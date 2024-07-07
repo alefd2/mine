@@ -1,11 +1,19 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import Stats from "three/examples/jsm/libs/stats.module";
+import { World } from "./world";
+import { createUI } from "./ui";
+
+const stats = new Stats();
+document.body.append(stats.dom);
 
 // renderer setup
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x80a0e0);
+
+// Renderizo os elementos na tela
 document.body.appendChild(renderer.domElement);
 
 // camera setup
@@ -15,19 +23,18 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(-32, 16, -32);
+camera.position.set(-80, 50, -32);
 camera.lookAt(0, 0, 0);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(16, 0, 16);
+controls.target.set(50, 0, 50);
 controls.update();
 
 // Scene setup
 const scene = new THREE.Scene();
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshLambertMaterial({ color: 0x00d000 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const world = new World();
+world.generate();
+scene.add(world);
 
 // Lights setup
 function setUpLights() {
@@ -46,20 +53,11 @@ function setUpLights() {
   scene.add(ambient);
 }
 
-function setUpWorld(size) {
-  for (let x = 0; x < size; x++) {
-    for (let z = 0; z < size; z++) {
-      const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(x, 0, z);
-      scene.add(cube);
-    }
-  }
-}
-
 // Render Loop
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  stats.update();
 }
 
 window.addEventListener("resize", () => {
@@ -68,6 +66,6 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-setUpWorld(32);
 setUpLights();
+createUI(world);
 animate();
